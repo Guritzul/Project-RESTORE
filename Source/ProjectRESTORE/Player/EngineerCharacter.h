@@ -6,10 +6,12 @@
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
 #include "Camera/CameraComponent.h"
+#include "Net/UnrealNetwork.h"
 #include "EngineerCharacter.generated.h"
 
 class UInputMappingContext;
 class UInputDataConfig;
+class UInputAction;
 
 UCLASS()
 class PROJECTRESTORE_API AEngineerCharacter : public ACharacter
@@ -35,11 +37,40 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "EnhancedInput")
 	UInputDataConfig* InputActions;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
+	UInputAction* SprintAction;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement")
+	float WalkSpeed = 300.f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement")
+	float SprintSpeed = 600.f;
+
+	UFUNCTION()
+	void SprintStarted();
+
+	UFUNCTION()
+	void SprintStopped();
+
+	UFUNCTION(Server, Reliable)
+	void Server_SprintStarted();
+
+	UFUNCTION(Server, Reliable)
+	void Server_SprintStopped();
+
 	UFUNCTION()
 	void Move(const FInputActionValue& Value);
 
 	UFUNCTION()
 	void Look(const FInputActionValue& Value);
+
+	void InteractPressed();
+
+	UFUNCTION(Server, Reliable)
+	void Server_TryPickupItem(class AItemBase* TargetItem);
+
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Inventory")
+	class AItemBase* CurrentCarriedItem = nullptr;
 
 public:	
 	// Called every frame

@@ -16,13 +16,25 @@ class PROJECTRESTORE_API UInputDataConfig : public UDataAsset
 	GENERATED_BODY()
 
 public:
+	// Walk
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement")
 	UInputAction* Move;
 
+	// Camera
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement")
 	UInputAction* Look;
 	
+	// Jump
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement")
+	UInputAction* Jump;
+
+	// Sprint
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement")
+	UInputAction* Sprint;
+
 	//Interact
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+	UInputAction* Interact;
 
 	//Flashlight
 };
