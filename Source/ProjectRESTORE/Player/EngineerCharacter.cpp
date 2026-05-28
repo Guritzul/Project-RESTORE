@@ -64,6 +64,11 @@ void AEngineerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 		{
 			Input->BindAction(InputActions->Look, ETriggerEvent::Triggered, this, &AEngineerCharacter::Look);
 		}
+		if (InputActions->Jump)
+		{
+			Input->BindAction(InputActions->Jump, ETriggerEvent::Started, this, &ACharacter::Jump);
+			Input->BindAction(InputActions->Jump, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
+		}
 	}
 
 }
