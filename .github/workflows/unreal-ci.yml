@@ -1,0 +1,26 @@
+name: ProjectRESTORE CI Verification
+
+on:
+  push:
+    branches: [ main, dev ]
+  pull_request:
+    branches: [ main, dev ]
+
+jobs:
+  verify-structure:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Source Code
+      uses: actions/checkout@v3
+
+    - name: Verify Critical Project Files
+      run: |
+        if [ ! -f "ProjectRESTORE.uproject" ]; then
+          echo "ERROR: ProjectRESTORE.uproject missing!"
+          exit 1
+        fi
+        if [ ! -d "Source" ]; then
+          echo "ERROR: Source folder missing!"
+          exit 1
+        fi
+        echo "Project structure verified successfully!"
