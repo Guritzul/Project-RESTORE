@@ -10,6 +10,7 @@
 
 class UInputMappingContext;
 class UInputDataConfig;
+class UInputAction;
 
 UCLASS()
 class PROJECTRESTORE_API AEngineerCharacter : public ACharacter
@@ -35,6 +36,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "EnhancedInput")
 	UInputDataConfig* InputActions;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
+	UInputAction* SprintAction;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement")
 	float WalkSpeed = 300.f;
 
@@ -46,6 +50,12 @@ protected:
 
 	UFUNCTION()
 	void SprintStopped();
+
+	UFUNCTION(Server, Reliable)
+	void Server_SprintStarted();
+
+	UFUNCTION(Server, Reliable)
+	void Server_SprintStopped();
 
 	UFUNCTION()
 	void Move(const FInputActionValue& Value);

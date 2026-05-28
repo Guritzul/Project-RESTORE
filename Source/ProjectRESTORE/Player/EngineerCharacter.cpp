@@ -112,9 +112,21 @@ void AEngineerCharacter::Look(const FInputActionValue& Value)
 void AEngineerCharacter::SprintStarted()
 {
 	GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
+	Server_SprintStarted();
 }
 
 void AEngineerCharacter::SprintStopped()
+{
+	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+	Server_SprintStopped();
+}
+
+void AEngineerCharacter::Server_SprintStarted_Implementation()
+{
+	GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
+}
+
+void AEngineerCharacter::Server_SprintStopped_Implementation()
 {
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 }
