@@ -6,6 +6,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "../Items/ItemBase.h"
 
 // Sets default values
 AEngineerCharacter::AEngineerCharacter()
@@ -77,6 +78,10 @@ void AEngineerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 			Input->BindAction(InputActions->Sprint, ETriggerEvent::Started, this, &AEngineerCharacter::SprintStarted);
 			Input->BindAction(InputActions->Sprint, ETriggerEvent::Completed, this, &AEngineerCharacter::SprintStopped);
 		}
+		if (InputActions->Interact)
+		{
+			Input->BindAction(InputActions->Interact, ETriggerEvent::Started, this, &AEngineerCharacter::InteractPressed);
+		}
 	}
 
 }
@@ -129,4 +134,48 @@ void AEngineerCharacter::Server_SprintStarted_Implementation()
 void AEngineerCharacter::Server_SprintStopped_Implementation()
 {
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+}
+
+void AEngineerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(AEngineerCharacter, CurrentCarriedItem);
+}
+
+void AEngineerCharacter::InteractPressed()
+{
+	if (CurrentCarriedItem != nullptr)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Cari deja o piesa! Nu poti lua mai multe."));
+		return;
+	}
+
+	APlayerController* PC = Cast<APlayerController>(GetController());
+	if (!PC) return;
+
+	FVector TraceStart = FirstPersonCameraComponent->GetComponentLocation();
+	FVector TraceDirection = FirstPersonCameraComponent->GetForwardVector();
+	FVector TraceEnd = TraceStart + (TraceDirection * 250.f);
+
+	FHitResult HitResult;
+	FCollisionQueryParams QueryParams;
+	QueryParams.AddIgnoredActor(this);
+
+	if (GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_Visibility, QueryParams))
+	{
+		if (AItemBase* HitItem = Cast<AItemBase>(HitResult.GetActor()))
+		{
+			Server_TryPickupItem(HitItem);
+		}
+	}
+}
+
+void AEngineerCharacter::Server_TryPickupItem_Implementation(AItemBase* TargetItem)
+{
+	if (TargetItem && CurrentCarriedItem == nullptr)
+	{
+		CurrentCarriedItem = TargetItem;
+		TargetItem->OnPickedUp();
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Obiect ridicat cu succes pe Server!"));
+	}
 }

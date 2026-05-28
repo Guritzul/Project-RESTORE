@@ -33,6 +33,8 @@ public:
 	UInputAction* Sprint;
 
 	//Interact
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+	UInputAction* Interact;
 
 	//Flashlight
 };

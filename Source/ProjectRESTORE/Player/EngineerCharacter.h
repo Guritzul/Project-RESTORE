@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
 #include "Camera/CameraComponent.h"
+#include "Net/UnrealNetwork.h"
 #include "EngineerCharacter.generated.h"
 
 class UInputMappingContext;
@@ -62,6 +63,14 @@ protected:
 
 	UFUNCTION()
 	void Look(const FInputActionValue& Value);
+
+	void InteractPressed();
+
+	UFUNCTION(Server, Reliable)
+	void Server_TryPickupItem(class AItemBase* TargetItem);
+
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Inventory")
+	class AItemBase* CurrentCarriedItem = nullptr;
 
 public:	
 	// Called every frame
