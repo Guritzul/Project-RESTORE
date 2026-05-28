@@ -5,6 +5,7 @@
 #include "../Components/InputDataConfig.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
 AEngineerCharacter::AEngineerCharacter()
@@ -19,6 +20,8 @@ AEngineerCharacter::AEngineerCharacter()
 	FirstPersonCameraComponent->SetRelativeLocation(FVector(0.f, 20.f, 160.f));
 
 	FirstPersonCameraComponent->bUsePawnControlRotation = true;
+
+	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 }
 
 // Called when the game starts or when spawned
@@ -69,6 +72,11 @@ void AEngineerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 			Input->BindAction(InputActions->Jump, ETriggerEvent::Started, this, &ACharacter::Jump);
 			Input->BindAction(InputActions->Jump, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 		}
+		if (InputActions->Sprint)
+		{
+			Input->BindAction(InputActions->Sprint, ETriggerEvent::Started, this, &AEngineerCharacter::SprintStarted);
+			Input->BindAction(InputActions->Sprint, ETriggerEvent::Completed, this, &AEngineerCharacter::SprintStopped);
+		}
 	}
 
 }
@@ -101,3 +109,12 @@ void AEngineerCharacter::Look(const FInputActionValue& Value)
 	}
 }
 
+void AEngineerCharacter::SprintStarted()
+{
+	GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
+}
+
+void AEngineerCharacter::SprintStopped()
+{
+	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+}

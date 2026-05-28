@@ -28,6 +28,10 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement")
 	UInputAction* Jump;
 
+	// Sprint
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement")
+	UInputAction* Sprint;
+
 	//Interact
 
 	//Flashlight

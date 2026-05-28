@@ -35,6 +35,18 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "EnhancedInput")
 	UInputDataConfig* InputActions;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement")
+	float WalkSpeed = 300.f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement")
+	float SprintSpeed = 600.f;
+
+	UFUNCTION()
+	void SprintStarted();
+
+	UFUNCTION()
+	void SprintStopped();
+
 	UFUNCTION()
 	void Move(const FInputActionValue& Value);
 
