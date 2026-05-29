@@ -28,17 +28,17 @@ protected:
 
 	// FP Camera
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
-	UCameraComponent* FirstPersonCameraComponent;
+	UCameraComponent *FirstPersonCameraComponent;
 
 	// Enhanced Player Movement
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "EnhancedInput")
-	UInputMappingContext* InputMapping;
+	UInputMappingContext *InputMapping;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "EnhancedInput")
-	UInputDataConfig* InputActions;
+	UInputDataConfig *InputActions;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
-	UInputAction* SprintAction;
+	UInputAction *SprintAction;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement")
 	float WalkSpeed = 300.f;
@@ -59,24 +59,32 @@ protected:
 	void Server_SprintStopped();
 
 	UFUNCTION()
-	void Move(const FInputActionValue& Value);
+	void Move(const FInputActionValue &Value);
 
 	UFUNCTION()
-	void Look(const FInputActionValue& Value);
+	void Look(const FInputActionValue &Value);
 
 	void InteractPressed();
 
 	UFUNCTION(Server, Reliable)
-	void Server_TryPickupItem(class AItemBase* TargetItem);
+	void Server_TryPickupItem(class AItemBase *TargetItem);
 
 	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Inventory")
-	class AItemBase* CurrentCarriedItem = nullptr;
+	class AItemBase *CurrentCarriedItem = nullptr;
 
-public:	
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<class UUserWidget> PauseMenuWidgetClass;
+
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual void SetupPlayerInputComponent(class UInputComponent *PlayerInputComponent) override;
 
+	void TogglePauseMenu();
+
+private:
+	UPROPERTY()
+	class UUserWidget *PauseMenuInstance;
 };

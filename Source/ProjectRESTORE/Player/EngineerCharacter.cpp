@@ -1,17 +1,17 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "EngineerCharacter.h"
 #include "../Components/InputDataConfig.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "../Items/ItemBase.h"
+#include "Blueprint/UserWidget.h"
 
 // Sets default values
 AEngineerCharacter::AEngineerCharacter()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
 	FirstPersonCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
@@ -29,25 +29,23 @@ AEngineerCharacter::AEngineerCharacter()
 void AEngineerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 // Called every frame
 void AEngineerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 // Called to bind functionality to input
-void AEngineerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+void AEngineerCharacter::SetupPlayerInputComponent(UInputComponent *PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	APlayerController* PlayerController = Cast<APlayerController>(GetController());
+	APlayerController *PlayerController = Cast<APlayerController>(GetController());
 	if (PlayerController)
 	{
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+		if (UEnhancedInputLocalPlayerSubsystem *Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 		{
 			Subsystem->ClearAllMappings();
 			if (InputMapping)
@@ -57,7 +55,7 @@ void AEngineerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 		}
 	}
 
-	UEnhancedInputComponent* Input = Cast<UEnhancedInputComponent>(PlayerInputComponent);
+	UEnhancedInputComponent *Input = Cast<UEnhancedInputComponent>(PlayerInputComponent);
 	if (Input && InputActions)
 	{
 		if (InputActions->Move)
@@ -82,11 +80,14 @@ void AEngineerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 		{
 			Input->BindAction(InputActions->Interact, ETriggerEvent::Started, this, &AEngineerCharacter::InteractPressed);
 		}
+		if (InputActions->Pause)
+		{
+			Input->BindAction(InputActions->Pause, ETriggerEvent::Completed, this, &AEngineerCharacter::TogglePauseMenu);
+		}
 	}
-
 }
 
-void AEngineerCharacter::Move(const FInputActionValue& Value)
+void AEngineerCharacter::Move(const FInputActionValue &Value)
 {
 	FVector2D MovementVector = Value.Get<FVector2D>();
 
@@ -103,7 +104,7 @@ void AEngineerCharacter::Move(const FInputActionValue& Value)
 	}
 }
 
-void AEngineerCharacter::Look(const FInputActionValue& Value)
+void AEngineerCharacter::Look(const FInputActionValue &Value)
 {
 	FVector2D LookAxisVector = Value.Get<FVector2D>();
 
@@ -136,7 +137,7 @@ void AEngineerCharacter::Server_SprintStopped_Implementation()
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 }
 
-void AEngineerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+void AEngineerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(AEngineerCharacter, CurrentCarriedItem);
@@ -150,8 +151,9 @@ void AEngineerCharacter::InteractPressed()
 		return;
 	}
 
-	APlayerController* PC = Cast<APlayerController>(GetController());
-	if (!PC) return;
+	APlayerController *PC = Cast<APlayerController>(GetController());
+	if (!PC)
+		return;
 
 	FVector TraceStart = FirstPersonCameraComponent->GetComponentLocation();
 	FVector TraceDirection = FirstPersonCameraComponent->GetForwardVector();
@@ -163,19 +165,57 @@ void AEngineerCharacter::InteractPressed()
 
 	if (GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_Visibility, QueryParams))
 	{
-		if (AItemBase* HitItem = Cast<AItemBase>(HitResult.GetActor()))
+		if (AItemBase *HitItem = Cast<AItemBase>(HitResult.GetActor()))
 		{
 			Server_TryPickupItem(HitItem);
 		}
 	}
 }
 
-void AEngineerCharacter::Server_TryPickupItem_Implementation(AItemBase* TargetItem)
+void AEngineerCharacter::Server_TryPickupItem_Implementation(AItemBase *TargetItem)
 {
 	if (TargetItem && CurrentCarriedItem == nullptr)
 	{
 		CurrentCarriedItem = TargetItem;
 		TargetItem->OnPickedUp();
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Obiect ridicat cu succes pe Server!"));
+	}
+}
+
+void AEngineerCharacter::TogglePauseMenu()
+{
+	if (!PauseMenuWidgetClass)
+		return;
+
+	APlayerController *PC = Cast<APlayerController>(GetController());
+	if (!PC)
+		return;
+
+	if (!PauseMenuInstance)
+	{
+		PauseMenuInstance = CreateWidget<UUserWidget>(PC, PauseMenuWidgetClass);
+	}
+
+	if (PauseMenuInstance)
+	{
+		if (!PauseMenuInstance->IsInViewport())
+		{
+			PauseMenuInstance->AddToViewport();
+
+			FInputModeGameAndUI InputMode;
+			InputMode.SetWidgetToFocus(PauseMenuInstance->TakeWidget());
+			InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+			PC->SetInputMode(InputMode);
+
+			PC->bShowMouseCursor = true;
+		}
+		else
+		{
+			PauseMenuInstance->RemoveFromParent();
+
+			FInputModeGameOnly InputMode;
+			PC->SetInputMode(InputMode);
+			PC->bShowMouseCursor = false;
+		}
 	}
 }

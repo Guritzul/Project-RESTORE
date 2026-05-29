@@ -8,7 +8,7 @@
 #include "InputDataConfig.generated.h"
 
 /**
- * 
+ *
  */
 UCLASS()
 class PROJECTRESTORE_API UInputDataConfig : public UDataAsset
@@ -18,23 +18,26 @@ class PROJECTRESTORE_API UInputDataConfig : public UDataAsset
 public:
 	// Walk
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement")
-	UInputAction* Move;
+	UInputAction *Move;
 
 	// Camera
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement")
-	UInputAction* Look;
-	
+	UInputAction *Look;
+
 	// Jump
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement")
-	UInputAction* Jump;
+	UInputAction *Jump;
 
 	// Sprint
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement")
-	UInputAction* Sprint;
+	UInputAction *Sprint;
 
-	//Interact
+	// Interact
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
-	UInputAction* Interact;
+	UInputAction *Interact;
 
-	//Flashlight
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+	UInputAction *Pause;
+
+	// Flashlight
 };
